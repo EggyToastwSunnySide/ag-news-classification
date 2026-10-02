@@ -194,8 +194,10 @@
     });
   }
 
-  // Select the last section whose heading passed below the fixed navigation.
-  // This also stays correct inside long sections, on upward scrolling, and at page end.
+  // Reading progress replaces the sticky navigation; the chapter index stays active.
+  const readingProgress = document.querySelector(".reading-progress");
+  const progressLine = readingProgress?.querySelector(".reading-progress-line");
+  if (readingProgress && progressLine) readingProgress.hidden = false;
   const nav = document.querySelector(".edition-nav");
   const links = Array.from(nav?.querySelectorAll("a[href^='#']") || []);
   const sections = links.map(link => ({ link, section: document.querySelector(link.hash) })).filter(item => item.section);
@@ -203,8 +205,12 @@
   let queued = false;
   function updateNavigation() {
     queued = false;
-    if (!nav || !sections.length) return;
-    const line = nav.getBoundingClientRect().height + 30;
+    const root = document.documentElement;
+    const scrollRange = root.scrollHeight - root.clientHeight;
+    const progress = scrollRange > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollRange)) : 0;
+    if (progressLine) progressLine.style.transform = "scaleX(" + progress + ")";
+    if (!sections.length) return;
+    const line = 32;
     let selected = sections[0];
     for (const item of sections) {
       if (item.section.getBoundingClientRect().top <= line) selected = item;
@@ -221,23 +227,18 @@
       if (link.hash === activeLink.hash) link.setAttribute("aria-current", "location");
       else link.removeAttribute("aria-current");
     });
-    const target = nav.scrollLeft + activeLink.getBoundingClientRect().left - nav.getBoundingClientRect().left - (nav.clientWidth - activeLink.offsetWidth) / 2;
-    nav.scrollTo({ left: target, behavior: reducedMotion.matches ? "instant" : "smooth" });
   }
   function scheduleNavigation() {
     if (queued) return;
     queued = true;
     requestAnimationFrame(updateNavigation);
   }
-  function measureNavigation() {
-    if (nav) document.documentElement.style.setProperty("--nav-height", nav.getBoundingClientRect().height + "px");
-    scheduleNavigation();
-  }
-  if (nav) {
+  if (nav || progressLine) {
     window.addEventListener("scroll", scheduleNavigation, { passive: true });
-    window.addEventListener("resize", measureNavigation);
-    window.addEventListener("load", measureNavigation);
-    if ("ResizeObserver" in window) new ResizeObserver(measureNavigation).observe(nav);
-    measureNavigation();
+    window.addEventListener("resize", scheduleNavigation);
+    window.addEventListener("load", scheduleNavigation);
+    document.addEventListener("toggle", scheduleNavigation, true);
+    if ("ResizeObserver" in window) new ResizeObserver(scheduleNavigation).observe(document.querySelector(".paper") || document.documentElement);
+    scheduleNavigation();
   }
 })();

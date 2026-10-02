@@ -6,7 +6,7 @@
 
 <div align="center">
     <h2>Machine Learning Course Project — Group 8</h2>
-    <h3>News Topic Classification</h3>
+    <h3>AG News Topic Classification</h3>
 </div>
 
 ---
@@ -36,7 +36,7 @@
 This project studies four-class news topic classification on the [AG News dataset](https://huggingface.co/datasets/fancyzhx/ag_news). It compares traditional text features and classifiers with pretrained embeddings, BiLSTM, and fine-tuned DistilBERT using common evaluation metrics and computational cost.
 
 - **GitHub:** [fufu3105/machine-learning-assignment](https://github.com/fufu3105/machine-learning-assignment)
-- **GitHub Pages:** [Github Pages](https://fufu3105.github.io/machine-learning-assignment/)
+- **GitHub Pages:** [Github Pages](https://fufu3105.github.io/ag-news-classification/)
 - **Dataset:** [AG News - Hugging Face](https://huggingface.co/datasets/fancyzhx/ag_news)
 - **Report:** [Final report](https://github.com/fufu3105/machine-learning-assignment/blob/main/report/final_report.pdf)
 

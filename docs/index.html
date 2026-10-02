@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#F4EFE6">
   <meta name="description" content="Machine Learning course report: AG News data analysis, preprocessing, model settings, validation, test results, and error analysis.">
-  <meta property="og:title" content="The News Gazette — News Topic Classification Report">
+  <meta property="og:title" content="AG News Topic Classification">
   <meta property="og:description" content="Course CO3117, Group 8: a comparison of traditional classifiers, pretrained embeddings, BiLSTM, and fine-tuned DistilBERT.">
   <meta property="og:type" content="website">
-  <title>The News Gazette | News Topic Classification</title>
+  <title>AG News Topic Classification</title>
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,6 +19,23 @@
   <script src="assets/script.js" defer></script>
 </head>
 <body id="top">
+  <div class="reading-progress" aria-hidden="true" hidden><span class="reading-progress-line"></span></div>
+  <svg class="chart-filter-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="chart-paper-background" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
+        <feComponentTransfer in="SourceGraphic" result="white-channels">
+          <feFuncR type="linear" slope="255" intercept="-254"/>
+          <feFuncG type="linear" slope="255" intercept="-254"/>
+          <feFuncB type="linear" slope="255" intercept="-254"/>
+        </feComponentTransfer>
+        <feColorMatrix in="white-channels" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.3333333 0.3333333 0.3333333 0 0" result="white-mask"/>
+        <feComponentTransfer in="white-mask" result="ink-mask">
+          <feFuncA type="discrete" tableValues="1 1 1 0"/>
+        </feComponentTransfer>
+        <feComposite in="SourceGraphic" in2="ink-mask" operator="in"/>
+      </filter>
+    </defs>
+  </svg>
   <a class="skip-link" href="#main-content">Skip to the report</a>
   <div class="paper">
     <header class="masthead">
@@ -34,8 +51,8 @@
           <span class="seal-bottom">EST. MMXXVI</span>
         </div>
         <div class="nameplate">
-          <p class="masthead-eyebrow small-caps">News topic classification</p>
-          <h1><span>The News</span> <span>Gazette</span></h1>
+          <p class="masthead-eyebrow small-caps">Research edition</p>
+          <h1><span>AG News</span> <span>Topic Classification</span></h1>
           <p class="masthead-motto">Machine Learning Course Project</p>
         </div>
         <div class="issue-box small-caps"><span>A special issue</span><strong>Machine<br>Learning</strong><span>Group VIII</span></div>
@@ -44,10 +61,30 @@
       <nav class="edition-nav" aria-label="Report chapters"><a href="#course">Course</a><span aria-hidden="true">|</span><a href="#overview">Problem</a><span aria-hidden="true">|</span><a href="#dataset">Dataset</a><span aria-hidden="true">|</span><a href="#pipeline">I. Pipeline</a><span aria-hidden="true">|</span><a href="#eda">II. EDA</a><span aria-hidden="true">|</span><a href="#preparation">III. Preparation</a><span aria-hidden="true">|</span><a href="#ml">IV. ML</a><span aria-hidden="true">|</span><a href="#dl">V. DL</a><span aria-hidden="true">|</span><a href="#results">VI. Results</a></nav>
     <div class="newspaper-layout">
       <main id="main-content">
-<section class="course-story" id="course" aria-labelledby="course-title"><div class="story-kicker small-caps"><span class="ink-label">Course information</span><span>Group 8 · CO3117</span></div><h2 id="course-title">Course information</h2><div class="story-links project-resources"><a class="stamp-link" href="https://github.com/fufu3105/machine-learning-assignment" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a class="stamp-link" href="https://colab.research.google.com/github/fufu3105/machine-learning-assignment/blob/main/assignment.ipynb" target="_blank" rel="noopener noreferrer">Google Colab ↗</a><!-- Replace this pending label with an anchor when the report PDF URL is available. --><span class="pending-report small-caps" id="report-pdf">Report PDF <small>Link pending</small></span></div>
+<section class="course-story" id="course" aria-labelledby="course-title"><div class="story-kicker small-caps"><span class="ink-label">Course information</span><span>Group 8 · CO3117</span></div><h2 id="course-title">Course information</h2>
+<div class="story-links project-resources">
+  <a class="stamp-link" href="https://github.com/fufu3105/machine-learning-assignment" target="_blank" rel="noopener noreferrer">
+    <svg class="resource-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M10.226 17.284c-2.965-.36-5.054-2.493-5.054-5.256 0-1.123.404-2.336 1.078-3.144-.292-.741-.247-2.314.09-2.965.898-.112 2.111.36 2.83 1.01.853-.269 1.752-.404 2.853-.404 1.1 0 1.999.135 2.807.382.696-.629 1.932-1.1 2.83-.988.315.606.36 2.179.067 2.942.72.854 1.101 2 1.101 3.167 0 2.763-2.089 4.852-5.098 5.234.763.494 1.28 1.572 1.28 2.807v2.336c0 .674.561 1.056 1.235.786 4.066-1.55 7.255-5.615 7.255-10.646C23.5 6.188 18.334 1 11.978 1 5.62 1 .5 6.188.5 12.545c0 4.986 3.167 9.12 7.435 10.669.606.225 1.19-.18 1.19-.786V20.63a2.9 2.9 0 0 1-1.078.224c-1.483 0-2.359-.808-2.987-2.313-.247-.607-.517-.966-1.034-1.033-.27-.023-.359-.135-.359-.27 0-.27.45-.471.898-.471.652 0 1.213.404 1.797 1.235.45.651.921.943 1.483.943.561 0 .92-.202 1.437-.719.382-.381.674-.718.944-.943"/></svg>
+    <span>GitHub <span aria-hidden="true">↗</span></span>
+  </a>
+  <a class="stamp-link" href="https://colab.research.google.com/github/fufu3105/machine-learning-assignment/blob/main/assignment.ipynb" target="_blank" rel="noopener noreferrer">
+    <svg class="resource-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="#e8710a" d="M1.977,16.77c-2.667-2.277-2.605-7.079,0-9.357C2.919,8.057,3.522,9.075,4.49,9.691c-1.152,1.6-1.146,3.201-0.004,4.803C3.522,15.111,2.918,16.126,1.977,16.77z"/>
+      <path fill="#f9ab00" d="M12.257,17.114c-1.767-1.633-2.485-3.658-2.118-6.02c0.451-2.91,2.139-4.893,4.946-5.678c2.565-0.718,4.964-0.217,6.878,1.819c-0.884,0.743-1.707,1.547-2.434,2.446C18.488,8.827,17.319,8.435,16,8.856c-2.404,0.767-3.046,3.241-1.494,5.644c-0.241,0.275-0.493,0.541-0.721,0.826C13.295,15.939,12.511,16.3,12.257,17.114z"/>
+      <path fill="#e8710a" d="M19.529,9.682c0.727-0.899,1.55-1.703,2.434-2.446c2.703,2.783,2.701,7.031-0.005,9.764c-2.648,2.674-6.936,2.725-9.701,0.115c0.254-0.814,1.038-1.175,1.528-1.788c0.228-0.285,0.48-0.552,0.721-0.826c1.053,0.916,2.254,1.268,3.6,0.83C20.502,14.551,21.151,11.927,19.529,9.682z"/>
+      <path fill="#f9ab00" d="M4.49,9.691C3.522,9.075,2.919,8.057,1.977,7.413c2.209-2.398,5.721-2.942,8.476-1.355c0.555,0.32,0.719,0.606,0.285,1.128c-0.157,0.188-0.258,0.422-0.391,0.631c-0.299,0.47-0.509,1.067-0.929,1.371C8.933,9.539,8.523,8.847,8.021,8.746C6.673,8.475,5.509,8.787,4.49,9.691z"/>
+      <path fill="#f9ab00" d="M1.977,16.77c0.941-0.644,1.545-1.659,2.509-2.277c1.373,1.152,2.85,1.433,4.45,0.499c0.332-0.194,0.503-0.088,0.673,0.19c0.386,0.635,0.753,1.285,1.181,1.89c0.34,0.48,0.222,0.715-0.253,1.006C7.84,19.73,4.205,19.188,1.977,16.77z"/>
+    </svg>
+    <span>Google Colab <span aria-hidden="true">↗</span></span>
+  </a>
+  <a class="stamp-link" id="report-pdf" href="https://github.com/fufu3105/ag-news-classification/blob/main/report/final_report.pdf" target="_blank" rel="noopener noreferrer">
+    <svg class="resource-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#D95327" d="M5 2h9l5 5v15H5Z"/><path fill="#F4EFE6" opacity=".6" d="M14 2v5h5Z"/><text x="12" y="17" fill="#F4EFE6" font-family="Arial, sans-serif" font-size="5.5" font-weight="700" text-anchor="middle" letter-spacing="0">PDF</text></svg>
+    <span>Report PDF <span aria-hidden="true">↗</span></span>
+  </a>
+</div>
 <dl class="course-information"><div><dt>Course</dt><dd>Machine Learning</dd></div><div><dt>Course code</dt><dd>CO3117</dd></div><div><dt>Semester</dt><dd>261, Academic Year 2026–2027</dd></div><div><dt>Instructor</dt><dd>Dr. Trương Vĩnh Lân</dd></div><div><dt>Group</dt><dd>8</dd></div></dl>
 <h3>Team members</h3>
-<div class="table-frame" tabindex="0" role="region" aria-label="Group 8 team members, scroll horizontally if needed"><table class="team-table"><caption>Group 8 team members</caption><thead><tr><th scope="col">Name</th><th scope="col">Student ID</th><th scope="col">Email</th></tr></thead><tbody>
+<div class="table-frame" tabindex="0" role="region" aria-label="Group 8 team members, scroll horizontally if needed"><table class="team-table"><caption>Group 8 - Team members</caption><thead><tr><th scope="col">Name</th><th scope="col">Student ID</th><th scope="col">Email</th></tr></thead><tbody>
 <tr><th scope="row">Trương Hoàng Phú</th><td>2352924</td><td><a href="mailto:phu.truonghoang@hcmut.edu.vn">phu.truonghoang@hcmut.edu.vn</a></td></tr>
 <tr><th scope="row">Nguyễn Tấn Khoa</th><td>2352576</td><td><a href="mailto:khoa.nguyen2352576@hcmut.edu.vn">khoa.nguyen2352576@hcmut.edu.vn</a></td></tr>
 <tr><th scope="row">Nguyễn Đức Thịnh</th><td>2353140</td><td><a href="mailto:thinh.nguyenthinh2503@hcmut.edu.vn">thinh.nguyenthinh2503@hcmut.edu.vn</a></td></tr>
@@ -196,9 +233,9 @@
 <p>The page retains the confusion-matrix figure. Example interpretations are descriptive and do not establish label noise or general model behavior.</p><figure class="research-figure"><a class="figure-link" href="assets/figures/final_representative_confusion_matrices.png" data-figure data-caption="Figure. Final test confusion matrices for TF-IDF + Linear SVM, BiLSTM, and fine-tuned DistilBERT. Rows are true labels; columns are predictions."><img src="assets/figures/final_representative_confusion_matrices.png" alt="Test confusion matrices for Linear SVM with TF-IDF, BiLSTM, and fine-tuned DistilBERT, showing World, Sports, Business, and Sci/Tech errors" width="2543" height="731" loading="lazy" decoding="async"></a><figcaption>Figure. Confusion matrices for three representative models. <span class="figure-hint">Select the figure to enlarge.</span></figcaption></figure></section></section>
 </main>
 
-      <aside class="sidebar" aria-label="Report contents and experiment notes"><section class="sidebar-feature"><p class="small-caps">Best test result</p><div class="headline-score">94.42<span>%</span></div><h2>Fine-tuned<br>DistilBERT</h2><p>Test Accuracy: <strong>94.42%</strong><br>Test Macro F1: <strong>0.9443</strong></p><a class="text-link" href="#results">View all test results →</a><div class="small-caps sidebar-footnote">7,600 official test records</div></section><section class="edition-index"><h2 class="ribbon"><span>Report chapters</span></h2><ol><li><a href="#pipeline"><span>Project pipeline</span><span>I</span></a></li><li><a href="#eda"><span>Exploratory data analysis</span><span>II</span></a></li><li><a href="#preparation"><span>Shared data preparation</span><span>III</span></a></li><li><a href="#ml"><span>Machine learning</span><span>IV</span></a></li><li><a href="#dl"><span>Deep learning</span><span>V</span></a></li><li><a href="#results"><span>Results and comparison</span><span>VI</span></a></li></ol></section><section class="sidebar-section"><p class="small-caps section-kicker">Evaluation protocol</p><blockquote>Fit on training.<br>Select on validation.<br>Report on test.</blockquote><p>Vocabulary and feature statistics use training data only. Test scores do not guide model selection.</p></section><section class="sidebar-section"><h2 class="sidebar-title">Experiment settings</h2><dl class="fact-ledger"><div><dt>Seed</dt><dd>42</dd></div><div><dt>Validation ratio</dt><dd>10% of groups</dd></div><div><dt>Classes</dt><dd>4</dd></div><div><dt>BiLSTM epochs</dt><dd>8</dd></div><div><dt>DistilBERT epochs</dt><dd>2</dd></div></dl></section><section class="sidebar-section field-note"><span class="small-caps">Token-length audit</span><strong>0.25%</strong><p>of prepared training texts exceed 128 DistilBERT tokens. Median length: 49 tokens.</p></section><section class="sidebar-section"><h2 class="sidebar-title">Runtime</h2><p>Python 3.14.2 · PyTorch 2.11.0 + CUDA 13.0 · NVIDIA GeForce RTX 5050 Laptop GPU.</p><p class="aside-small">Reported timing scopes differ between classifier fitting, embedding extraction, and neural training.</p></section><section class="sidebar-section source-box"><span class="small-caps">Reading guide</span><h2>Chapter index</h2><ul class="source-list compact-chapter-index"><li><a data-chapter-link href="#pipeline">I. Pipeline</a></li><li><a data-chapter-link href="#eda">II. EDA</a></li><li><a data-chapter-link href="#preparation">III. Preparation</a></li><li><a data-chapter-link href="#ml">IV. ML</a></li><li><a data-chapter-link href="#dl">V. DL</a></li><li><a data-chapter-link href="#results">VI. Results</a></li></ul><h3>Recorded outputs</h3><ul class="source-list"><li><a href="assets/figures/traditional_ml_validation_comparison.png" data-figure data-caption="Traditional ML validation">Traditional ML validation</a></li><li><a href="assets/figures/pretrained_embedding_classifier_comparison.png" data-figure data-caption="Pretrained representation comparison">Pretrained representation comparison</a></li><li><a href="assets/figures/distilbert_token_length_distribution.png" data-figure data-caption="DistilBERT token lengths">DistilBERT token lengths</a></li><li><a href="assets/figures/final_model_test_comparison.png" data-figure data-caption="Final test scores">Final test scores</a></li></ul></section></aside>
+      <aside class="sidebar" aria-label="Report contents and experiment notes"><section class="sidebar-feature"><p class="small-caps">Best test result</p><div class="headline-score">94.42<span>%</span></div><h2>Fine-tuned<br>DistilBERT</h2><p>Test Accuracy: <strong>94.42%</strong><br>Test Macro F1: <strong>0.9443</strong></p><a class="text-link" href="#results">View all test results →</a><div class="small-caps sidebar-footnote">7,600 official test records</div></section><section class="edition-index"><h2 class="ribbon"><span>Report chapters</span></h2><ol><li><a href="#pipeline"><span>Project pipeline</span><span>I</span></a></li><li><a href="#eda"><span>Exploratory data analysis</span><span>II</span></a></li><li><a href="#preparation"><span>Shared data preparation</span><span>III</span></a></li><li><a href="#ml"><span>Machine learning</span><span>IV</span></a></li><li><a href="#dl"><span>Deep learning</span><span>V</span></a></li><li><a href="#results"><span>Results and comparison</span><span>VI</span></a></li></ol></section><section class="sidebar-section"><p class="small-caps section-kicker">Evaluation protocol</p><blockquote>Fit on training.<br>Select on validation.<br>Report on test.</blockquote><p>Vocabulary and feature statistics use training data only. Test scores do not guide model selection.</p></section><section class="sidebar-section source-box"><span class="small-caps">Reading guide</span><h2>Chapter index</h2><ul class="source-list compact-chapter-index"><li><a data-chapter-link href="#pipeline">I. Pipeline</a></li><li><a data-chapter-link href="#eda">II. EDA</a></li><li><a data-chapter-link href="#preparation">III. Preparation</a></li><li><a data-chapter-link href="#ml">IV. ML</a></li><li><a data-chapter-link href="#dl">V. DL</a></li><li><a data-chapter-link href="#results">VI. Results</a></li></ul><h3>Recorded outputs</h3><ul class="source-list"><li><a href="assets/figures/traditional_ml_validation_comparison.png" data-figure data-caption="Traditional ML validation">Traditional ML validation</a></li><li><a href="assets/figures/pretrained_embedding_classifier_comparison.png" data-figure data-caption="Pretrained representation comparison">Pretrained representation comparison</a></li><li><a href="assets/figures/distilbert_token_length_distribution.png" data-figure data-caption="DistilBERT token lengths">DistilBERT token lengths</a></li><li><a href="assets/figures/final_model_test_comparison.png" data-figure data-caption="Final test scores">Final test scores</a></li></ul></section></aside>
     </div>
-    <footer class="colophon"><div><span class="small-caps">The News Gazette · Research edition</span><p>A Machine Learning course project · CO3117 · HCMUT · Group 8</p><p class="team-names">Trương Hoàng Phú · Nguyễn Tấn Khoa · Nguyễn Đức Thịnh · Lương Thế Kiệt</p></div><a class="back-to-top small-caps" href="#top">Back to the masthead ↑</a></footer>
+    <footer class="colophon"><div><span class="small-caps">AG News Topic Classification · Research edition</span><p>A Machine Learning course project · CO3117 · HCMUT · Group 8</p><p class="team-names">Trương Hoàng Phú · Nguyễn Tấn Khoa · Nguyễn Đức Thịnh · Lương Thế Kiệt</p></div><a class="back-to-top small-caps" href="#top">Back to the masthead ↑</a></footer>
   </div>
   <dialog class="plate-dialog" id="plate-dialog" aria-labelledby="plate-dialog-title">
     <div class="dialog-heading"><h2 id="plate-dialog-title">Recorded experiment figure</h2><button class="ink-button" type="button" id="close-plate" aria-label="Close enlarged figure">Close ×</button></div>
