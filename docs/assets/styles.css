@@ -9,7 +9,8 @@
   --muted-ink: #625b51;
   --serif: "EB Garamond", Georgia, "Times New Roman", serif;
   --display: "Bodoni Moda", Didot, "Bodoni MT", Georgia, serif;
-  --label: "Courier New", Courier, monospace;
+  --label: "Segoe UI", Arial, Helvetica, sans-serif;
+  --label-size: 12px;
 }
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 24px; }
@@ -409,3 +410,43 @@ tbody th { font-weight: 500; }td { text-align: right; white-space: nowrap; }.spl
 .benchmark-row .benchmark-bar, .benchmark-row.is-leading .benchmark-bar { background: var(--chart-color,#dd8452); border-color: var(--chart-color,#dd8452); }
 .split-segment.training { background: #4c72b0; }.split-segment.validation { background: #dd8452; }.split-segment.test { color: var(--paper); background: #55a868; }
 .split-legend > div { border-top-color: #4c72b0; }.split-legend > div:nth-child(2) { border-top-color: #dd8452; }.split-legend > div:nth-child(3) { border-top: 2px solid #55a868; }
+
+/* Keep interface labels readable at every viewport, including mobile. */
+.small-caps, .edition-line, .story-kicker, .byline, .plate-heading,
+.frontpage-facts span, .section-rule, .section-rule .notebook-ref,
+.section-kicker, .figure-heading, .editorial-note > span, .branch-number,
+.print-details summary, .benchmark-toolbar > span, .chart-axis,
+.result-gain span, .case-file > span, .prediction-ledger dt, .source-credit,
+.sidebar-feature > p:first-child, .sidebar-footnote, .ribbon,
+.field-note > span, .source-box > span, .colophon > div > span, .back-to-top,
+.course-information dt, .split-legend dt, .comparison-intro .small-caps,
+.chapter-contents > span, .frequency-controls label,
+.route-in small, .route-out small,
+.stamp-link, .ink-button, .metric-controls .ink-button,
+.view-controls .ink-button, .dialog-heading .ink-button, thead th {
+  font-size: var(--label-size);
+  line-height: 1.6;
+  letter-spacing: .04em;
+}
+.distribution-row strong, .distribution-row small, .benchmark-row strong,
+.frequency-row > strong, .team-table td:last-child, .team-table td:nth-child(2),
+.feature-table td:nth-child(2), .split-segment, .split-legend dd small {
+  font-size: var(--label-size);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: normal;
+}
+.edition-nav {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .025em;
+  gap: 8px 12px;
+}
+.edition-nav a { display: inline-flex; align-items: center; min-height: 40px; }
+thead th { font-weight: 600; }
+code { font-size: .85em; }
+.benchmark-toolbar, .metric-controls { flex-wrap: wrap; }
+.distribution-row { grid-template-columns: 66px minmax(0,1fr) 105px; }
+@media (max-width:540px) {
+  .edition-nav { justify-content: flex-start; }
+  .distribution-row { grid-template-columns: 60px minmax(0,1fr) 100px; }
+}
