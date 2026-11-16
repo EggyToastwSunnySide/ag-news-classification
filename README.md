@@ -111,8 +111,9 @@ Metrics, tables and figures are written to `results/` and are committed.
 
 #### Download features
 
-Google Drive link: to be added
-<!-- TODO(package C): insert Google Drive link -->
+Google Drive link: [ag-news-features](https://drive.google.com/drive/folders/1oCFBaANxYipA5F7bYCYpBbyhf1Jzn59b) (public, view only)
+
+Download the `pretrained/` and `traditional/` folders into `features/`. SHA-256 checksums of all 18 files are in `features/SHA256SUMS.txt` of the course submission zip.
 
 ---
 
